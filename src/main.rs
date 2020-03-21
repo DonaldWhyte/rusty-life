@@ -1,14 +1,8 @@
 extern crate rand;
 extern crate termsize;
 
-static CLEAR_TERMIAL_CONTROL_CHAR: &str = "\x1B[2J";
-static SLEEP_INTERVAL: std::time::Duration =
-    //std::time::Duration::from_millis(1000 / 30); // 30 FPS
-    std::time::Duration::from_secs(3);
-
 static DEAD_CELL: &str = " ";
 static LIVE_CELL: &str = "\u{25A0}";
-static CELL_INITIALIZED_AS_LIVE_PROBABILITY: f64 = 0.1;
 
 // The grid is stored as a vector of one-char strings for easy terminal
 // rendering. Each element of the vector represents a cell in the grid. The
@@ -56,28 +50,20 @@ impl Grid {
         self.num_rows * self.num_columns
     }
 
-    pub fn num_live_cells(&self) -> usize {
-        self.cells.iter().filter(|&neighbour| *neighbour == LIVE_CELL).count()
-    }
-
-    pub fn num_dead_cells(&self) -> usize {
-        self.cells.iter().filter(|&neighbour| *neighbour == DEAD_CELL).count()
-    }
-
     pub fn cell_state(&self, row: i64, column: i64) -> &str {
         if row < 0 || row >= self.num_rows as i64 ||
            column < 0 || column >= self.num_columns as i64
         {
             DEAD_CELL  // out of bounds
         } else {
-            let cell_num = row as usize + (column as usize * self.num_rows);
+            let cell_num = row as usize * self.num_columns + column as usize;
             &self.cells[cell_num]
         }
     }
 
     fn next_state_of_cell_num(&self, cell_num: usize) -> &str {
-        let row = cell_num % self.num_columns;
-        let column = cell_num / self.num_rows;
+        let row = cell_num / self.num_columns;
+        let column = cell_num % self.num_columns;
         self.next_state_of_cell(row, column)
     }
 
@@ -105,6 +91,16 @@ impl Grid {
             self.cell_state(signed_row, signed_column - 1),  // above
             self.cell_state(signed_row, signed_column + 1)   // below
         ];
+
+        /*println!(
+            "{},{} {},{} ({}) --> {},{}({}) {},{}({}) {},{}({}) {},{}({}) --> num_live_neighbours={}",
+            row, column, signed_row, signed_column, self.cell_state(signed_row, signed_column),
+            signed_row - 1, signed_column, self.cell_state(signed_row - 1, signed_column),
+            signed_row + 1, signed_column, self.cell_state(signed_row + 1, signed_column),
+            signed_row, signed_column - 1, self.cell_state(signed_row, signed_column - 1),
+            signed_row, signed_column + 1, self.cell_state(signed_row, signed_column + 1),
+            neighbours.iter().filter(|&n| *n == LIVE_CELL).count());*/
+
         neighbours.iter().filter(|&n| *n == LIVE_CELL).count()
     }
 
@@ -118,6 +114,8 @@ impl std::fmt::Display for Grid {
 }
 
 fn generate_initial_cell_value<R: rand::Rng>(rng: &mut R) -> String {
+    static CELL_INITIALIZED_AS_LIVE_PROBABILITY: f64 = 0.35;
+
     if rng.gen_range(0.0, 1.0) <= CELL_INITIALIZED_AS_LIVE_PROBABILITY {
         LIVE_CELL.to_string()
     } else {
@@ -130,9 +128,11 @@ fn run(rows: usize, columns: usize) {
     let mut grid = Grid::new(rows, columns, &mut rng);
 
     loop {
-        //print!("{}{}", CLEAR_TERMIAL_CONTROL_CHAR, grid);
-        println!("{} {}", grid.num_live_cells(), grid.num_dead_cells());
+        static CLEAR_TERMIAL_CONTROL_CHAR: &str = "\x1B[2J";
+        print!("{}{}", CLEAR_TERMIAL_CONTROL_CHAR, grid);
 
+        static SLEEP_INTERVAL: std::time::Duration =
+            std::time::Duration::from_millis(1000 / 10); // 10 FPS
         std::thread::sleep(SLEEP_INTERVAL);
 
         grid = grid.update();

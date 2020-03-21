@@ -6,26 +6,26 @@ static LIVE_CELL: &str = "\u{25A0}";
 
 // The grid is stored as a vector of one-char strings for easy terminal
 // rendering. Each element of the vector represents a cell in the grid. The
-// cells are stored in row major form.
+// cells are stored in x major form.
 //
 // Using strings instead of chars, despite being less efficient, because it's
 // much easier to deal with unicode characters in full strings in Rust.
 struct Grid {
-    num_rows: usize,
-    num_columns: usize,
+    width: usize,
+    height: usize,
     cells: Vec<String>
 }
 
 impl Grid {
 
-    pub fn new<R: rand::Rng>(num_rows: usize,
-                             num_columns: usize,
+    pub fn new<R: rand::Rng>(width: usize,
+                             height: usize,
                              rng: &mut R) -> Grid
     {
-        let num_cells = num_rows * num_columns;
+        let num_cells = width * height;
         return Grid {
-            num_rows: num_rows,
-            num_columns: num_columns,
+            width: width,
+            height: height,
             cells:
                 (0..num_cells)
                 .map(|_| generate_initial_cell_value(rng))
@@ -37,8 +37,8 @@ impl Grid {
         // Source of update rules:
         // https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life#Rules
         Grid {
-            num_rows: self.num_rows,
-            num_columns: self.num_columns,
+            width: self.width,
+            height: self.height,
             cells:
                 (0..self.num_cells())
                 .map(|cell_num| self.next_state_of_cell_num(cell_num).to_string())
@@ -47,29 +47,29 @@ impl Grid {
     }
 
     pub fn num_cells(&self) -> usize {
-        self.num_rows * self.num_columns
+        self.width * self.height
     }
 
-    pub fn cell_state(&self, row: i64, column: i64) -> &str {
-        if row < 0 || row >= self.num_rows as i64 ||
-           column < 0 || column >= self.num_columns as i64
+    pub fn cell_state(&self, x: i64, y: i64) -> &str {
+        if x < 0 || x >= self.width as i64 ||
+           y < 0 || y >= self.height as i64
         {
             DEAD_CELL  // out of bounds
         } else {
-            let cell_num = row as usize * self.num_columns + column as usize;
+            let cell_num = x as usize * self.height + y as usize;
             &self.cells[cell_num]
         }
     }
 
     fn next_state_of_cell_num(&self, cell_num: usize) -> &str {
-        let row = cell_num / self.num_columns;
-        let column = cell_num % self.num_columns;
-        self.next_state_of_cell(row, column)
+        let x = cell_num / self.height;
+        let y = cell_num % self.height;
+        self.next_state_of_cell(x, y)
     }
 
-    fn next_state_of_cell(&self, row: usize, column: usize) -> &str {
-        let current_state = self.cell_state(row as i64, column as i64);
-        let num_live_neighbours = self.num_live_neighbours(row, column);
+    fn next_state_of_cell(&self, x: usize, y: usize) -> &str {
+        let current_state = self.cell_state(x as i64, y as i64);
+        let num_live_neighbours = self.num_live_neighbours(x, y);
 
         if current_state == LIVE_CELL &&
            (num_live_neighbours == 2 || num_live_neighbours == 3)
@@ -82,23 +82,23 @@ impl Grid {
         }
     }
 
-    fn num_live_neighbours(&self, row: usize, column: usize) -> usize {
-        let signed_row = row as i64;
-        let signed_column = column as i64;
+    fn num_live_neighbours(&self, x: usize, y: usize) -> usize {
+        let signed_x = x as i64;
+        let signed_y = y as i64;
         let neighbours = vec![
-            self.cell_state(signed_row - 1, signed_column),  // left
-            self.cell_state(signed_row + 1, signed_column),  // right
-            self.cell_state(signed_row, signed_column - 1),  // above
-            self.cell_state(signed_row, signed_column + 1)   // below
+            self.cell_state(signed_x - 1, signed_y),  // left
+            self.cell_state(signed_x + 1, signed_y),  // right
+            self.cell_state(signed_x, signed_y - 1),  // above
+            self.cell_state(signed_x, signed_y + 1)   // below
         ];
 
         /*println!(
             "{},{} {},{} ({}) --> {},{}({}) {},{}({}) {},{}({}) {},{}({}) --> num_live_neighbours={}",
-            row, column, signed_row, signed_column, self.cell_state(signed_row, signed_column),
-            signed_row - 1, signed_column, self.cell_state(signed_row - 1, signed_column),
-            signed_row + 1, signed_column, self.cell_state(signed_row + 1, signed_column),
-            signed_row, signed_column - 1, self.cell_state(signed_row, signed_column - 1),
-            signed_row, signed_column + 1, self.cell_state(signed_row, signed_column + 1),
+            x, y, signed_x, signed_y, self.cell_state(signed_x, signed_y),
+            signed_x - 1, signed_y, self.cell_state(signed_x - 1, signed_y),
+            signed_x + 1, signed_y, self.cell_state(signed_x + 1, signed_y),
+            signed_x, signed_y - 1, self.cell_state(signed_x, signed_y - 1),
+            signed_x, signed_y + 1, self.cell_state(signed_x, signed_y + 1),
             neighbours.iter().filter(|&n| *n == LIVE_CELL).count());*/
 
         neighbours.iter().filter(|&n| *n == LIVE_CELL).count()
@@ -123,9 +123,9 @@ fn generate_initial_cell_value<R: rand::Rng>(rng: &mut R) -> String {
     }
 }
 
-fn run(rows: usize, columns: usize) {
+fn run(width: usize, height: usize) {
     let mut rng = rand::thread_rng();
-    let mut grid = Grid::new(rows, columns, &mut rng);
+    let mut grid = Grid::new(width, height, &mut rng);
 
     loop {
         static CLEAR_TERMIAL_CONTROL_CHAR: &str = "\x1B[2J";

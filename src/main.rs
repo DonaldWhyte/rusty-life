@@ -2,7 +2,7 @@ extern crate rand;
 extern crate termsize;
 
 static DEAD_CELL: &str = " ";
-static LIVE_CELL: &str = "\u{25A0}";
+static LIVE_CELL: &str = "X";//"\u{25A0}";
 
 // The grid is stored as a vector of one-char strings for easy terminal
 // rendering. Each element of the vector represents a cell in the grid. The
@@ -56,14 +56,14 @@ impl Grid {
         {
             DEAD_CELL  // out of bounds
         } else {
-            let cell_num = x as usize * self.height + y as usize;
+            let cell_num = x as usize + y as usize * self.width;
             &self.cells[cell_num]
         }
     }
 
     fn next_state_of_cell_num(&self, cell_num: usize) -> &str {
-        let x = cell_num / self.height;
-        let y = cell_num % self.height;
+        let x = cell_num % self.width;
+        let y = cell_num / self.width;
         self.next_state_of_cell(x, y)
     }
 
@@ -91,16 +91,6 @@ impl Grid {
             self.cell_state(signed_x, signed_y - 1),  // above
             self.cell_state(signed_x, signed_y + 1)   // below
         ];
-
-        /*println!(
-            "{},{} {},{} ({}) --> {},{}({}) {},{}({}) {},{}({}) {},{}({}) --> num_live_neighbours={}",
-            x, y, signed_x, signed_y, self.cell_state(signed_x, signed_y),
-            signed_x - 1, signed_y, self.cell_state(signed_x - 1, signed_y),
-            signed_x + 1, signed_y, self.cell_state(signed_x + 1, signed_y),
-            signed_x, signed_y - 1, self.cell_state(signed_x, signed_y - 1),
-            signed_x, signed_y + 1, self.cell_state(signed_x, signed_y + 1),
-            neighbours.iter().filter(|&n| *n == LIVE_CELL).count());*/
-
         neighbours.iter().filter(|&n| *n == LIVE_CELL).count()
     }
 

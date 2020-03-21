@@ -6,4 +6,4 @@ edition = "2018"
 
 [dependencies]
 rand="*"
-termsize="*"
+term_size="*"

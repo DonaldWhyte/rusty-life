@@ -1,5 +1,5 @@
 extern crate rand;
-extern crate termsize;
+extern crate term_size;
 
 static DEAD_CELL: &str = " ";
 static LIVE_CELL: &str = "X";//"\u{25A0}";
@@ -22,13 +22,22 @@ impl Grid {
                              height: usize,
                              rng: &mut R) -> Grid
     {
+        static CELL_INITIALIZED_AS_LIVE_PROBABILITY: f64 = 0.35;
+        let mut generate_initial_cell_value = || {
+            if rng.gen_range(0.0, 1.0) <= CELL_INITIALIZED_AS_LIVE_PROBABILITY {
+                LIVE_CELL
+            } else {
+                DEAD_CELL
+            }
+        };
+
         let num_cells = width * height;
         return Grid {
             width: width,
             height: height,
             cells:
                 (0..num_cells)
-                .map(|_| generate_initial_cell_value(rng))
+                .map(|_| generate_initial_cell_value().to_string())
                 .collect()
         }
     }
@@ -103,16 +112,6 @@ impl std::fmt::Display for Grid {
     }
 }
 
-fn generate_initial_cell_value<R: rand::Rng>(rng: &mut R) -> String {
-    static CELL_INITIALIZED_AS_LIVE_PROBABILITY: f64 = 0.35;
-
-    if rng.gen_range(0.0, 1.0) <= CELL_INITIALIZED_AS_LIVE_PROBABILITY {
-        LIVE_CELL.to_string()
-    } else {
-        DEAD_CELL.to_string()
-    }
-}
-
 fn run(width: usize, height: usize) {
     let mut rng = rand::thread_rng();
     let mut grid = Grid::new(width, height, &mut rng);
@@ -122,7 +121,7 @@ fn run(width: usize, height: usize) {
         print!("{}{}", CLEAR_TERMIAL_CONTROL_CHAR, grid);
 
         static SLEEP_INTERVAL: std::time::Duration =
-            std::time::Duration::from_millis(1000 / 10); // 10 FPS
+            std::time::Duration::from_millis(1000 / 1); // 10 FPS
         std::thread::sleep(SLEEP_INTERVAL);
 
         grid = grid.update();
@@ -131,12 +130,12 @@ fn run(width: usize, height: usize) {
 
 
 fn main() {
-    termsize::get().map_or_else(
+    term_size::dimensions().map_or_else(
         || {
             println!("Could not determine terminal width and height. Aborting.")
         },
         |size| {
-            run(size.rows as usize, size.cols as usize)
+            run(size.0, size.1);
         }
     );
 }

@@ -1,0 +1,9 @@
+[package]
+name = "rusty-life"
+version = "0.1.0"
+authors = ["Donald Whyte <donaldwhyte0@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+rand="*"
+termsize="*"

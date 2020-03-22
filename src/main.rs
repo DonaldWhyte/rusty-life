@@ -17,10 +17,10 @@ fn run(width: usize, height: usize) {
 
     loop {
         static CLEAR_TERMIAL_CONTROL_CHAR: &str = "\x1B[2J";
-        println!("{}{}", CLEAR_TERMIAL_CONTROL_CHAR, grid);
+        print!("{}{}", CLEAR_TERMIAL_CONTROL_CHAR, grid);
 
         static SLEEP_INTERVAL: std::time::Duration =
-            std::time::Duration::from_millis(1000 / 1); // 10 FPS
+            std::time::Duration::from_millis(1000 / 5); // 5 FPS
         std::thread::sleep(SLEEP_INTERVAL);
 
         grid = grid.update();

@@ -88,13 +88,16 @@ impl Grid {
     }
 
     fn num_live_neighbours(&self, x: usize, y: usize) -> usize {
-        let signed_x = x as i64;
-        let signed_y = y as i64;
+        let move_coord = |base: i64, n: i64, length: i64| {
+            (base + n).rem_euclid(length) as usize
+        };
+        let move_x = |n: i64| move_coord(x as i64, n, self.width as i64);
+        let move_y = |n: i64| move_coord(y as i64, n, self.height as i64);
         let neighbours = vec![
-            self.cell_state((signed_x - 1) as usize % self.width, y),   // left
-            self.cell_state((signed_x + 1) as usize % self.width, y),   // right
-            self.cell_state(x, (signed_y - 1) as usize % self.height),  // above
-            self.cell_state(x, (signed_y + 1) as usize % self.height)   // below
+            self.cell_state(move_x(-1), y),  // left
+            self.cell_state(move_x(1), y),   // right
+            self.cell_state(x, move_y(-1)),  // above
+            self.cell_state(x, move_y(1))    // below
         ];
         neighbours.iter().filter(|&n| *n == LIVE).count()
     }
@@ -127,6 +130,7 @@ fn write_top_or_bottom_border(fmt: &mut std::fmt::Formatter,
         fmt.write_char('-')?;
     }
     fmt.write_char('+')?;
+    fmt.write_char('\n')?;
     Ok(())
 }
 

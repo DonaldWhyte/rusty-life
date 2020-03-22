@@ -56,28 +56,27 @@ impl Grid {
     }
 
     pub fn num_cells(&self) -> usize {
-        self.width * self.height
+        self.cells.len()
     }
 
-    pub fn cell_state(&self, x: i64, y: i64) -> &str {
-        if x < 0 || x >= self.width as i64 ||
-           y < 0 || y >= self.height as i64
-        {
-            DEAD_CELL  // out of bounds
-        } else {
-            let cell_num = x as usize + y as usize * self.width;
-            &self.cells[cell_num]
-        }
+    pub fn cell_state(&self, x: usize, y: usize) -> &str {
+        assert!(x < self.width && y < self.height);
+        let cell_num = x + y * self.width;
+        &self.cells[cell_num]
     }
 
     fn next_state_of_cell_num(&self, cell_num: usize) -> &str {
+        assert!(cell_num < self.num_cells());
+
         let x = cell_num % self.width;
         let y = cell_num / self.width;
+        assert!(x < self.width && y < self.height);
+
         self.next_state_of_cell(x, y)
     }
 
     fn next_state_of_cell(&self, x: usize, y: usize) -> &str {
-        let current_state = self.cell_state(x as i64, y as i64);
+        let current_state = self.cell_state(x, y);
         let num_live_neighbours = self.num_live_neighbours(x, y);
 
         if current_state == LIVE_CELL &&
@@ -95,10 +94,10 @@ impl Grid {
         let signed_x = x as i64;
         let signed_y = y as i64;
         let neighbours = vec![
-            self.cell_state(signed_x - 1, signed_y),  // left
-            self.cell_state(signed_x + 1, signed_y),  // right
-            self.cell_state(signed_x, signed_y - 1),  // above
-            self.cell_state(signed_x, signed_y + 1)   // below
+            self.cell_state((signed_x - 1) as usize % self.width, y),   // left
+            self.cell_state((signed_x + 1) as usize % self.width, y),   // right
+            self.cell_state(x, (signed_y - 1) as usize % self.height),  // above
+            self.cell_state(x, (signed_y + 1) as usize % self.height)   // below
         ];
         neighbours.iter().filter(|&n| *n == LIVE_CELL).count()
     }

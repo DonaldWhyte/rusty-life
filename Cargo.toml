@@ -1,8 +1,18 @@
 [package]
 name = "rusty-life"
-version = "0.1.0"
-authors = ["Donald Whyte <donaldwhyte0@gmail.com>"]
+version = "1.0.0"
 edition = "2018"
+authors = ["Donald Whyte <donsoft@donsoft.io>"]
+repository = "https://github.com/DonaldWhyte/rusty-life"
+homepage = "https://github.com/DonaldWhyte/rusty-life"
+documentation = "https://docs.rs/rusty-life"
+license = "MIT"
+readme = "README.md"
+keywords = [ "conway's", "game", "life", "cli"]
+categories= [
+    "games"
+]
+description="Rust implementation of Conway's Game of Life that's rendered to the terminal"
 
 [dependencies]
 docopt="*"

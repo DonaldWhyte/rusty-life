@@ -18,6 +18,8 @@ Or after installing the crate using `cargo install rusty-life`, run:
 rusty-life
 ```
 
+(assuming at `$HOME/.cargo/bin` is in your `PATH`)
+
 ## Options
 
 ```

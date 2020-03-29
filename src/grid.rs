@@ -19,7 +19,7 @@ impl Grid {
                              height: usize,
                              rng: &mut R) -> Grid
     {
-        static CELL_INITIALIZED_AS_LIVE_PROBABILITY: f64 = 0.35;
+        static CELL_INITIALIZED_AS_LIVE_PROBABILITY: f64 = 0.1;
         let mut generate_initial_cell_value = || {
             if rng.gen_range(0.0, 1.0) <= CELL_INITIALIZED_AS_LIVE_PROBABILITY {
                 LIVE
@@ -94,10 +94,14 @@ impl Grid {
         let move_x = |n: i64| move_coord(x as i64, n, self.width as i64);
         let move_y = |n: i64| move_coord(y as i64, n, self.height as i64);
         let neighbours = vec![
-            self.cell_state(move_x(-1), y),  // left
-            self.cell_state(move_x(1), y),   // right
-            self.cell_state(x, move_y(-1)),  // above
-            self.cell_state(x, move_y(1))    // below
+            self.cell_state(move_x(-1), move_y(-1)),  // top left
+            self.cell_state(x, move_y(-1)),           // top middle
+            self.cell_state(move_x(1), move_y(-1)),   // top right
+            self.cell_state(move_x(-1), y),           // middle left
+            self.cell_state(move_x(1), y),            // middle right
+            self.cell_state(move_x(-1), move_y(1)),   // bottom left
+            self.cell_state(x, move_y(1)),            // bottom middle
+            self.cell_state(move_x(1), move_y(1))     // bottom right
         ];
         neighbours.iter().filter(|&n| *n == LIVE).count()
     }

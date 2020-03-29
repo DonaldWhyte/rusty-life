@@ -8,7 +8,7 @@ homepage = "https://github.com/DonaldWhyte/rusty-life"
 documentation = "https://docs.rs/rusty-life"
 license = "MIT"
 readme = "README.md"
-keywords = [ "conway's", "game", "life", "cli"]
+keywords = [ "conway", "conways", "game", "life", "cli"]
 categories= [
     "games"
 ]

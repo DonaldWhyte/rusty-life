@@ -6,7 +6,7 @@ static DEAD: bool = false;
 static LIVE: bool = true;
 
 // The grid is stored as a vector of booleans. Each element of the vector
-// re esents a cell in the grid. The cells are stored in row major form.
+// repreesents a cell in the grid. The cells are stored in row major form.
 pub struct Grid {
     width: usize,
     height: usize,
